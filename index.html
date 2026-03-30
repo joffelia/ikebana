@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生花 — Ikebana Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0b0b09;
+  --dark:#0f0f0d;
+  --surface:#141412;
+  --panel:#181816;
+  --border:#222220;
+  --border2:rgba(255,255,255,0.05);
+  --lime:#b4e628;
+  --lime-dim:rgba(180,230,40,0.09);
+  --lime-border:rgba(180,230,40,0.22);
+  --text:#ddd8c8;
+  --muted:#5a5750;
+  --muted2:#3a3830;
+  --serif:'DM Serif Display',serif;
+  --mono:'Space Mono',monospace;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--black)}
+body{font-family:var(--mono);color:var(--text);user-select:none}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw;transition:opacity 0.6s}
+#app.fading{opacity:0;pointer-events:none}
+
+/* HEADER */
+#header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 20px;border-bottom:1px solid var(--border);
+  flex-shrink:0;background:var(--dark);position:relative;z-index:10;
+}
+#header::after{content:'';position:absolute;bottom:-1px;left:20px;width:28px;height:1px;background:var(--lime)}
+.header-left{display:flex;align-items:baseline;gap:10px}
+.title-jp{font-family:var(--serif);font-size:16px;color:var(--text)}
+.title-en{font-size:8px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
+.step-indicator{font-size:8px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase}
+.step-dot{width:4px;height:4px;border-radius:50%;background:var(--muted2);display:inline-block;margin:0 3px;transition:background 0.3s}
+.step-dot.active{background:var(--lime)}
+
+/* WORKSPACE */
+#workspace{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* LEFT PANEL */
+#panel{
+  width:200px;flex-shrink:0;background:var(--panel);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;
+}
+.panel-section{padding:12px 12px 8px}
+.panel-label{font-size:8px;letter-spacing:0.18em;color:var(--lime);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.panel-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* VASE SELECTOR */
+#vase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0 12px 12px}
+.vase-btn{
+  aspect-ratio:3/4;background:var(--surface);border:1px solid var(--border);
+  border-radius:3px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;
+  padding:3px;transition:border-color 0.2s;overflow:hidden;
+}
+.vase-btn:hover{border-color:var(--muted)}
+.vase-btn.selected{border-color:var(--lime);background:var(--lime-dim)}
+.vase-btn svg{width:100%;height:90%}
+
+/* PALETTE */
+#palette{flex:1;overflow-y:auto;padding-bottom:12px}
+#palette::-webkit-scrollbar{width:2px}
+#palette::-webkit-scrollbar-thumb{background:var(--muted2)}
+.cat-label{font-size:7px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;padding:8px 12px 5px;display:block}
+.element-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 7px}
+.elem-btn{
+  aspect-ratio:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:3px;cursor:grab;display:flex;align-items:center;justify-content:center;
+  padding:5px;transition:border-color 0.2s,transform 0.15s;flex-direction:column;gap:2px;
+}
+.elem-btn:hover{border-color:var(--muted);transform:scale(1.05)}
+.elem-btn svg{width:100%;height:72%;pointer-events:none}
+.elem-name{font-size:6px;letter-spacing:0.05em;color:var(--muted);text-align:center;pointer-events:none;line-height:1.2}
+
+/* CANVAS */
+#canvas-wrap{
+  flex:1;position:relative;overflow:hidden;background:var(--dark);
+  display:flex;align-items:center;justify-content:center;
+}
+#canvas-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 28% 72%, rgba(38,50,18,0.45) 0%,transparent 68%),
+    radial-gradient(ellipse 40% 55% at 76% 28%, rgba(28,38,14,0.28) 0%,transparent 60%);
+}
+#canvas{
+  position:relative;width:560px;height:100%;
+  border-left:1px solid var(--border2);border-right:1px solid var(--border2);
+}
+#canvas-inner{position:absolute;inset:0;overflow:hidden}
+
+/* VASE — 5 layers matching elevation diagram */
+#canvas-vase-z2a,#canvas-vase-z2b-back,#canvas-vase-z2b-front,#canvas-vase-body{
+  position:absolute;bottom:48px;left:50%;transform:translateX(-50%);
+  pointer-events:none;
+}
+#canvas-vase-z2a      { z-index:1; width:140px; }
+#canvas-vase-z2b-back { z-index:2; width:140px; }
+#canvas-vase-z2b-front{ z-index:6; width:140px; }
+#canvas-vase-body     { z-index:5; width:140px; }
+#canvas-vase-z2a svg,#canvas-vase-z2b-back svg,#canvas-vase-z2b-front svg,#canvas-vase-body svg{width:100%;height:auto;display:block}
+
+/* DROP HINT */
+#drop-hint{
+  position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none;opacity:1;transition:opacity 0.4s;
+}
+#drop-hint.hidden{opacity:0}
+.hint-circle{
+  width:140px;height:140px;border-radius:50%;
+  border:1px dashed rgba(255,255,255,0.05);
+  margin:0 auto 12px;display:flex;align-items:center;justify-content:center;
+}
+.hint-text{font-size:8px;letter-spacing:0.16em;color:var(--muted2);text-transform:uppercase;line-height:2}
+
+/* PLACED ELEMENTS — z4: above top ellipse(z2), below vase body(z5) */
+.canvas-elem{
+  position:absolute;cursor:grab;z-index:4;
+}
+.canvas-elem.selected-elem{outline:1px dashed rgba(180,230,40,0.5);outline-offset:3px;border-radius:2px}
+.canvas-elem svg{width:100%;height:100%;pointer-events:none;display:block}
+
+/* RESIZE HANDLE */
+.elem-resize{
+  position:absolute;bottom:-5px;right:-5px;
+  width:12px;height:12px;cursor:se-resize;opacity:0;transition:opacity 0.2s;z-index:10;
+}
+.elem-resize::before{
+  content:'';position:absolute;inset:0;
+  border-right:2px solid var(--lime);border-bottom:2px solid var(--lime);
+  border-radius:0 0 2px 0;
+}
+
+/* ROTATE HANDLE */
+.elem-rotate{
+  position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  width:16px;height:16px;cursor:crosshair;opacity:0;transition:opacity 0.2s;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--lime);line-height:1;
+}
+.canvas-elem:hover .elem-resize,
+.canvas-elem:hover .elem-rotate{opacity:1}
+.canvas-elem.selected-elem .elem-rotate{opacity:0.5}
+
+/* FOOTER */
+#footer{
+  padding:9px 20px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;background:var(--dark);
+}
+.footer-info{font-size:8px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase}
+.footer-info span{color:var(--lime);margin-left:5px}
+#clear-btn{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.15em;
+  color:var(--muted);background:transparent;border:1px solid var(--border);
+  padding:6px 12px;border-radius:2px;cursor:pointer;text-transform:uppercase;
+  transition:border-color 0.2s,color 0.2s;
+}
+#clear-btn:hover{border-color:var(--muted);color:var(--text)}
+#done-btn{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.2em;
+  color:var(--black);background:var(--lime);border:none;
+  padding:8px 20px;border-radius:2px;cursor:pointer;text-transform:uppercase;
+  transition:opacity 0.2s,transform 0.15s;font-weight:700;
+}
+#done-btn:hover{opacity:0.88}
+#done-btn:active{transform:scale(0.97)}
+#done-btn:disabled{opacity:0.2;cursor:not-allowed}
+
+/* ── DISPLAY MODE ── */
+#display-mode{
+  position:fixed;inset:0;z-index:200;
+  opacity:0;pointer-events:none;
+  transition:opacity 1.4s ease;
+  overflow:hidden;
+}
+#display-mode.visible{opacity:1;pointer-events:all}
+
+/* Mist layers */
+#mist-bg{position:absolute;inset:0}
+.mist-base{position:absolute;inset:0;background:#0e1409}
+.mist-layer{position:absolute;inset:-30%;border-radius:50%}
+.mist-layer:nth-child(2){
+  background:radial-gradient(ellipse 65% 50% at 38% 62%, rgba(100,118,58,0.6) 0%,transparent 60%);
+  animation:md1 20s ease-in-out infinite alternate;
+}
+.mist-layer:nth-child(3){
+  background:radial-gradient(ellipse 45% 65% at 68% 35%, rgba(78,98,42,0.4) 0%,transparent 55%);
+  animation:md2 26s ease-in-out infinite alternate-reverse;animation-delay:-10s;
+}
+.mist-layer:nth-child(4){
+  background:radial-gradient(ellipse 75% 35% at 50% 80%, rgba(55,72,28,0.35) 0%,transparent 50%);
+  animation:md3 32s ease-in-out infinite alternate;animation-delay:-18s;
+}
+@keyframes md1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(3%,2%) scale(1.04)}}
+@keyframes md2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-2%,3%) scale(0.97)}}
+@keyframes md3{0%{transform:translate(0,0) scale(1)}100%{transform:translate(2%,-2%) scale(1.03)}}
+
+/* Arrangement snapshot — scaled up and centered */
+#display-arrangement{
+  position:absolute;inset:0;pointer-events:none;
+}
+
+/* Scattered text */
+#display-text{
+  position:absolute;inset:0;pointer-events:none;
+  font-family:var(--mono);color:rgba(215,208,178,0.4);
+}
+.dt-tl{position:absolute;top:24px;left:28px;line-height:1.9}
+.dt-title{font-family:var(--serif);font-style:italic;font-size:12px;color:rgba(215,208,178,0.52);letter-spacing:0.08em;display:block;margin-bottom:2px}
+.dt-date{font-size:9px;letter-spacing:0.1em;color:rgba(215,208,178,0.32)}
+.dt-flowers{position:absolute;font-size:9px;letter-spacing:0.06em;line-height:2.2;color:rgba(215,208,178,0.32)}
+.dt-br{position:absolute;bottom:24px;right:28px;font-size:8px;letter-spacing:0.14em;color:rgba(215,208,178,0.18);text-align:right;line-height:2}
+
+/* Remake */
+#remake-btn{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:8px;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(215,208,178,0.28);background:transparent;
+  border:1px solid rgba(215,208,178,0.1);
+  padding:7px 18px;border-radius:2px;cursor:pointer;
+  transition:color 0.3s,border-color 0.3s;white-space:nowrap;
+}
+#remake-btn:hover{color:rgba(215,208,178,0.6);border-color:rgba(215,208,178,0.28)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header id="header">
+    <div class="header-left">
+      <span class="title-jp">生花</span>
+      <span class="title-en">Ikebana Builder</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="step-indicator">vessel</span>
+      <span class="step-dot active" id="dot1"></span>
+      <span class="step-dot" id="dot2"></span>
+      <span class="step-indicator">arrange</span>
+    </div>
+  </header>
+
+  <div id="workspace">
+    <!-- PANEL -->
+    <div id="panel">
+      <div class="panel-section">
+        <div class="panel-label"><span>Vessel</span></div>
+      </div>
+      <div id="vase-grid">
+        <button class="vase-btn selected" data-vase="cylinder" title="Tall cylinder">
+          <svg viewBox="0 0 60 90" fill="none"><ellipse cx="30" cy="14" rx="18" ry="5" stroke="#6e6a5e" stroke-width="1"/><line x1="12" y1="14" x2="10" y2="82" stroke="#6e6a5e" stroke-width="1"/><line x1="48" y1="14" x2="50" y2="82" stroke="#6e6a5e" stroke-width="1"/><ellipse cx="30" cy="82" rx="20" ry="5.5" stroke="#6e6a5e" stroke-width="1"/><ellipse cx="30" cy="14" rx="18" ry="5" fill="#1a1a17" stroke="#3a3830" stroke-width="0.5"/></svg>
+        </button>
+        <button class="vase-btn" data-vase="widemouth" title="Wide mouth">
+          <svg viewBox="0 0 60 90" fill="none"><path d="M10 18 Q8 55 14 82" stroke="#6e6a5e" stroke-width="1" fill="none"/><path d="M50 18 Q52 55 46 82" stroke="#6e6a5e" stroke-width="1" fill="none"/><ellipse cx="30" cy="18" rx="20" ry="5" stroke="#6e6a5e" stroke-width="1"/><ellipse cx="30" cy="82" rx="16" ry="4" stroke="#6e6a5e" stroke-width="1"/><ellipse cx="30" cy="18" rx="20" ry="5" fill="#1a1a17" stroke="#3a3830" stroke-width="0.5"/></svg>
+        </button>
+        <button class="vase-btn" data-vase="kenzan" title="Kenzan bowl">
+          <svg viewBox="0 0 60 90" fill="none"><path d="M8 60 Q6 78 16 82" stroke="#6e6a5e" stroke-width="1" fill="none"/><path d="M52 60 Q54 78 44 82" stroke="#6e6a5e" stroke-width="1" fill="none"/><ellipse cx="30" cy="60" rx="22" ry="6" stroke="#6e6a5e" stroke-width="1"/><ellipse cx="30" cy="82" rx="14" ry="3.5" stroke="#6e6a5e" stroke-width="1"/><ellipse cx="30" cy="60" rx="22" ry="6" fill="#1a1a17" stroke="#3a3830" stroke-width="0.5"/><line x1="22" y1="63" x2="22" y2="70" stroke="#3a3830" stroke-width="0.8"/><line x1="28" y1="63" x2="28" y2="70" stroke="#3a3830" stroke-width="0.8"/><line x1="34" y1="63" x2="34" y2="70" stroke="#3a3830" stroke-width="0.8"/></svg>
+        </button>
+      </div>
+
+      <div id="palette">
+        <span class="cat-label">Blooms</span>
+        <div class="element-grid">
+          <div class="elem-btn" data-id="peony" data-name="Peony">
+            <svg viewBox="0 0 50 60"><line x1="25" y1="55" x2="25" y2="38" stroke="#4a6630" stroke-width="1.5"/><ellipse cx="15" cy="50" rx="4" ry="7" fill="#3a5a28" transform="rotate(-30,15,50)"/><circle cx="25" cy="26" r="14" fill="#8B2252" opacity="0.15"/><ellipse cx="25" cy="30" rx="11" ry="9" fill="#C1436A"/><ellipse cx="20" cy="26" rx="7" ry="6" fill="#D4547B"/><ellipse cx="30" cy="27" rx="7" ry="6" fill="#C94B72"/><ellipse cx="25" cy="22" rx="7" ry="6" fill="#DC6585"/><ellipse cx="25" cy="26" rx="5" ry="5" fill="#E87899"/><ellipse cx="25" cy="25" rx="3" ry="3" fill="#F9A8BE"/><circle cx="25" cy="24" r="1.5" fill="#FFCCD8"/></svg>
+            <span class="elem-name">Peony</span>
+          </div>
+          <div class="elem-btn" data-id="iris" data-name="Iris">
+            <svg viewBox="0 0 50 65"><line x1="25" y1="65" x2="25" y2="42" stroke="#4a6630" stroke-width="1.5"/><ellipse cx="17" cy="55" rx="3" ry="8" fill="#3a5a28" transform="rotate(-20,17,55)"/><ellipse cx="25" cy="38" rx="5" ry="12" fill="#5B3A8A" transform="rotate(-15,25,38)"/><ellipse cx="32" cy="36" rx="5" ry="12" fill="#6B4A9A" transform="rotate(15,32,36)"/><ellipse cx="25" cy="30" rx="4" ry="10" fill="#7C5BAA"/><ellipse cx="22" cy="22" rx="4" ry="8" fill="#8D6CBB" transform="rotate(-10,22,22)"/><ellipse cx="28" cy="22" rx="4" ry="8" fill="#9D7CCB" transform="rotate(10,28,22)"/><ellipse cx="25" cy="18" rx="3" ry="6" fill="#AE8DCC"/><circle cx="25" cy="16" r="2" fill="#C4AADD"/></svg>
+            <span class="elem-name">Iris</span>
+          </div>
+          <div class="elem-btn" data-id="chrysanthemum" data-name="Chrysanthemum">
+            <svg viewBox="0 0 50 60"><line x1="25" y1="58" x2="25" y2="36" stroke="#4a6630" stroke-width="1.5"/><ellipse cx="16" cy="50" rx="3" ry="7" fill="#3a5a28" transform="rotate(-25,16,50)"/><g transform="translate(25,26)"><ellipse rx="3" ry="10" fill="#E8E0C8" transform="rotate(0)"/><ellipse rx="3" ry="10" fill="#DDD5BE" transform="rotate(30)"/><ellipse rx="3" ry="10" fill="#E8E0C8" transform="rotate(60)"/><ellipse rx="3" ry="10" fill="#DDD5BE" transform="rotate(90)"/><ellipse rx="3" ry="10" fill="#E8E0C8" transform="rotate(120)"/><ellipse rx="3" ry="10" fill="#DDD5BE" transform="rotate(150)"/><ellipse rx="2.5" ry="8" fill="#EDE8D8" transform="rotate(15)"/><ellipse rx="2.5" ry="8" fill="#E8E0C8" transform="rotate(45)"/><ellipse rx="2.5" ry="8" fill="#EDE8D8" transform="rotate(75)"/><ellipse rx="2.5" ry="8" fill="#E8E0C8" transform="rotate(105)"/><ellipse rx="2.5" ry="8" fill="#EDE8D8" transform="rotate(135)"/><circle r="5" fill="#D4C890"/><circle r="3" fill="#C8BA78"/></g></svg>
+            <span class="elem-name">Chrysanth.</span>
+          </div>
+          <div class="elem-btn" data-id="lotus" data-name="Lotus">
+            <svg viewBox="0 0 50 60"><line x1="25" y1="60" x2="25" y2="40" stroke="#4a6630" stroke-width="1.5"/><ellipse cx="25" cy="42" rx="14" ry="5" fill="#2a4a1a" opacity="0.6"/><ellipse cx="25" cy="38" rx="12" ry="6" fill="#DB8EA0"/><ellipse cx="18" cy="34" rx="6" ry="11" fill="#E9A8B8" transform="rotate(-20,18,34)"/><ellipse cx="32" cy="34" rx="6" ry="11" fill="#E9A8B8" transform="rotate(20,32,34)"/><ellipse cx="25" cy="28" rx="6" ry="12" fill="#F0BBca"/><ellipse cx="20" cy="26" rx="5" ry="10" fill="#F5CEDD" transform="rotate(-10,20,26)"/><ellipse cx="30" cy="26" rx="5" ry="10" fill="#F5CEDD" transform="rotate(10,30,26)"/><ellipse cx="25" cy="22" rx="4" ry="8" fill="#FADADD"/><circle cx="25" cy="20" r="3" fill="#FFE8EC"/></svg>
+            <span class="elem-name">Lotus</span>
+          </div>
+        </div>
+
+        <span class="cat-label">Branches</span>
+        <div class="element-grid">
+          <div class="elem-btn" data-id="cherry" data-name="Cherry blossom">
+            <svg viewBox="0 0 50 70"><path d="M25 70 Q24 50 20 35 Q16 22 10 12" stroke="#6B3A2A" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M20 35 Q28 28 36 20" stroke="#6B3A2A" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M22 45 Q30 40 38 35" stroke="#6B3A2A" stroke-width="1.2" fill="none" stroke-linecap="round"/><g transform="translate(10,12)"><circle r="5" fill="#FFCCD8"/><circle r="3" fill="#FFB3C6"/><circle cx="-3" cy="2" r="3" fill="#FFCCD8"/><circle cx="3" cy="2" r="3" fill="#FFB3C6"/><circle cx="0" cy="-3" r="3" fill="#FFCCD8"/><circle r="1.5" fill="#FF9EBF"/></g><g transform="translate(36,20)"><circle r="4" fill="#FFCCD8"/><circle r="2.5" fill="#FFB3C6"/><circle cx="-3" cy="1" r="2.5" fill="#FFCCD8"/><circle cx="3" cy="1" r="2.5" fill="#FFB3C6"/><circle r="1.2" fill="#FF9EBF"/></g><g transform="translate(38,35)"><circle r="4" fill="#FFCCD8"/><circle r="2.5" fill="#FFB3C6"/><circle cx="-2" cy="2" r="2.5" fill="#FFCCD8"/><circle r="1.2" fill="#FF9EBF"/></g></svg>
+            <span class="elem-name">Cherry</span>
+          </div>
+          <div class="elem-btn" data-id="pine" data-name="Pine branch">
+            <svg viewBox="0 0 50 70"><path d="M25 70 Q25 48 24 30" stroke="#3D2B1A" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M24 42 Q14 34 8 26" stroke="#3D2B1A" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M24 34 Q34 28 42 20" stroke="#3D2B1A" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M24 30 Q20 18 18 8" stroke="#3D2B1A" stroke-width="1.5" fill="none" stroke-linecap="round"/><g transform="translate(8,26)"><line x1="0" y1="0" x2="-6" y2="-4" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-4" y2="-7" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="-8" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="2" y2="-8" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="-6" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/></g><g transform="translate(42,20)"><line x1="0" y1="0" x2="-5" y2="-5" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="0" y2="-8" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="5" y2="-5" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/></g><g transform="translate(18,8)"><line x1="0" y1="0" x2="-5" y2="-4" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="0" y2="-8" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="5" y2="-4" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/></g></svg>
+            <span class="elem-name">Pine</span>
+          </div>
+          <div class="elem-btn" data-id="plum" data-name="Plum branch">
+            <svg viewBox="0 0 50 70"><path d="M25 70 L24 48 L18 28" stroke="#4A3020" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 48 L36 32" stroke="#4A3020" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M18 28 L10 14" stroke="#4A3020" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M18 28 L28 16" stroke="#4A3020" stroke-width="1.3" fill="none" stroke-linecap="round"/><g transform="translate(10,14)"><circle cx="0" cy="-4" r="3" fill="#F5E0F0"/><circle cx="3.8" cy="-1.2" r="3" fill="#EDD0E8"/><circle cx="2.3" cy="3.2" r="3" fill="#F5E0F0"/><circle cx="-2.3" cy="3.2" r="3" fill="#EDD0E8"/><circle cx="-3.8" cy="-1.2" r="3" fill="#F5E0F0"/><circle r="2" fill="#E8C4E0"/><circle r="0.8" fill="#F0A0C8"/></g><g transform="translate(36,32)"><circle cx="0" cy="-3.5" r="2.5" fill="#F5E0F0"/><circle cx="3.3" cy="-1" r="2.5" fill="#EDD0E8"/><circle cx="2" cy="2.8" r="2.5" fill="#F5E0F0"/><circle cx="-2" cy="2.8" r="2.5" fill="#EDD0E8"/><circle cx="-3.3" cy="-1" r="2.5" fill="#F5E0F0"/><circle r="1.8" fill="#E8C4E0"/></g><g transform="translate(28,16)"><circle cx="0" cy="-3" r="2.2" fill="#F5E0F0"/><circle cx="2.9" cy="-0.9" r="2.2" fill="#EDD0E8"/><circle cx="1.8" cy="2.5" r="2.2" fill="#F5E0F0"/><circle cx="-1.8" cy="2.5" r="2.2" fill="#EDD0E8"/><circle cx="-2.9" cy="-0.9" r="2.2" fill="#F5E0F0"/><circle r="1.5" fill="#E8C4E0"/></g></svg>
+            <span class="elem-name">Plum</span>
+          </div>
+        </div>
+
+        <span class="cat-label">Foliage</span>
+        <div class="element-grid">
+          <div class="elem-btn" data-id="fern" data-name="Fern">
+            <svg viewBox="0 0 50 65"><path d="M25 65 Q24 45 20 28 Q16 14 12 6" stroke="#3A5E1E" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M20 28 Q14 26 10 22" stroke="#3A5E1E" stroke-width="1" fill="none"/><path d="M20 35 Q14 33 9 28" stroke="#3A5E1E" stroke-width="1" fill="none"/><path d="M21 42 Q15 40 11 36" stroke="#3A5E1E" stroke-width="1" fill="none"/><ellipse cx="14" cy="24" rx="4" ry="2" fill="#4A7828" transform="rotate(-30,14,24)"/><ellipse cx="12" cy="30" rx="4" ry="2" fill="#3E6E22" transform="rotate(-35,12,30)"/><ellipse cx="13" cy="37" rx="4" ry="2" fill="#4A7828" transform="rotate(-40,13,37)"/><path d="M20 28 Q26 26 30 22" stroke="#3A5E1E" stroke-width="1" fill="none"/><ellipse cx="26" cy="24" rx="4" ry="2" fill="#4A7828" transform="rotate(30,26,24)"/><path d="M21 35 Q27 33 31 28" stroke="#3A5E1E" stroke-width="1" fill="none"/><ellipse cx="27" cy="30" rx="4" ry="2" fill="#3E6E22" transform="rotate(35,27,30)"/><ellipse cx="14" cy="10" rx="3" ry="1.5" fill="#4A7828" transform="rotate(-20,14,10)"/></svg>
+            <span class="elem-name">Fern</span>
+          </div>
+          <div class="elem-btn" data-id="moss" data-name="Moss">
+            <svg viewBox="0 0 50 50"><ellipse cx="25" cy="38" rx="22" ry="8" fill="#2A4A16" opacity="0.6"/><ellipse cx="25" cy="36" rx="20" ry="9" fill="#3A6020"/><ellipse cx="16" cy="33" rx="8" ry="6" fill="#4A7228"/><ellipse cx="32" cy="32" rx="9" ry="7" fill="#426A22"/><ellipse cx="25" cy="30" rx="8" ry="6" fill="#548030"/><ellipse cx="14" cy="30" rx="5" ry="4" fill="#4A7228"/><ellipse cx="36" cy="30" rx="5" ry="4" fill="#426A22"/><ellipse cx="25" cy="27" rx="6" ry="4" fill="#5E8A38"/><circle cx="20" cy="28" r="1.5" fill="#6A9840" opacity="0.7"/><circle cx="28" cy="27" r="1.5" fill="#6A9840" opacity="0.7"/><circle cx="24" cy="25" r="1.2" fill="#78A848" opacity="0.6"/></svg>
+            <span class="elem-name">Moss</span>
+          </div>
+          <div class="elem-btn" data-id="broadleaf" data-name="Broad leaf">
+            <svg viewBox="0 0 50 65"><path d="M25 65 Q25 50 25 40" stroke="#4A6A20" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M25 40 Q10 30 8 14 Q20 8 32 18 Q40 28 25 40Z" fill="#5A7E2A"/><path d="M25 40 Q10 30 8 14" stroke="#3A5E18" stroke-width="0.8" fill="none"/><path d="M25 40 Q18 32 14 22" stroke="#4A6E22" stroke-width="0.6" fill="none"/><path d="M25 40 Q22 30 22 20" stroke="#4A6E22" stroke-width="0.6" fill="none"/><path d="M25 40 Q28 30 30 20" stroke="#4A6E22" stroke-width="0.6" fill="none"/><path d="M25 40 Q32 33 34 24" stroke="#4A6E22" stroke-width="0.6" fill="none"/></svg>
+            <span class="elem-name">Broad leaf</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div id="canvas-wrap">
+      <div id="canvas-bg"></div>
+      <div id="canvas">
+        <div id="canvas-inner">
+          <div id="drop-hint">
+            <div class="hint-circle">
+              <div class="hint-text">drag flowers<br>here</div>
+            </div>
+          </div>
+        </div>
+        <div id="canvas-vase-z2a"></div>
+        <div id="canvas-vase-z2b-back"></div>
+        <div id="canvas-vase-body"></div>
+        <div id="canvas-vase-z2b-front"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Display mode — full app overlay -->
+  <div id="display-mode">
+    <div id="mist-bg">
+      <div class="mist-base"></div>
+      <div class="mist-layer"></div>
+      <div class="mist-layer"></div>
+      <div class="mist-layer"></div>
+    </div>
+    <div id="display-arrangement"></div>
+    <div id="display-text">
+      <div class="dt-tl">
+        <span class="dt-title">生花 · ikebana</span>
+        <span class="dt-date" id="dt-date"></span>
+      </div>
+      <div class="dt-flowers" id="dt-flowers" style="bottom:120px;left:28px"></div>
+      <div class="dt-br">arranged<br>by hand</div>
+    </div>
+    <button id="remake-btn">↺ &nbsp;remake</button>
+  </div>
+
+  <footer id="footer">
+    <div class="footer-info">placed: <span id="count">0</span></div>
+    <div style="display:flex;gap:8px">
+      <button id="clear-btn">Clear</button>
+      <button id="done-btn" disabled>完成 &nbsp;Done</button>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const state = { selectedVase:'cylinder', elements:[], nextId:0, drag:null, selectedElem:null };
+
+const vaseSVGs = {
+  cylinder:{
+    z2a:`<svg viewBox="0 0 110 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 26 Q55 15 98 26 Q55 37 12 26Z" fill="#0f0f0d"/>
+    </svg>`,
+    z2bBack:`<svg viewBox="0 0 110 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 26 Q55 15 98 26" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    </svg>`,
+    body:`<svg viewBox="0 0 110 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 26 Q55 37 98 26 L100 155 Q55 168 10 155 Z" fill="#0e0e0c"/>
+      <line x1="12" y1="26" x2="10" y2="155" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+      <line x1="98" y1="26" x2="100" y2="155" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+      <ellipse cx="55" cy="155" rx="45" ry="12" fill="#0a0a08" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    </svg>`,
+    z2bFront:`<svg viewBox="0 0 110 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 26 Q55 37 98 26" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    </svg>`,
+  },
+  widemouth:{
+    z2a:`<svg viewBox="0 0 130 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 26 Q65 13 117 26 Q65 39 13 26Z" fill="#0f0f0d"/>
+    </svg>`,
+    z2bBack:`<svg viewBox="0 0 130 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 26 Q65 13 117 26" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    </svg>`,
+    body:`<svg viewBox="0 0 130 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 26 Q65 39 117 26 Q122 90 110 155 Q65 168 20 155 Q8 90 13 26Z" fill="#0e0e0c"/>
+      <path d="M13 26 Q8 90 20 155" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/>
+      <path d="M117 26 Q122 90 110 155" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/>
+      <ellipse cx="65" cy="155" rx="46" ry="12" fill="#0a0a08" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    </svg>`,
+    z2bFront:`<svg viewBox="0 0 130 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 26 Q65 39 117 26" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    </svg>`,
+  },
+  kenzan:{
+    z2a:`<svg viewBox="0 0 150 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 32 Q75 15 139 32 Q75 49 11 32Z" fill="#0f0f0d"/>
+    </svg>`,
+    z2bBack:`<svg viewBox="0 0 150 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 32 Q75 15 139 32" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    </svg>`,
+    body:`<svg viewBox="0 0 150 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 32 Q75 49 139 32 Q142 58 128 76 Q75 88 22 76 Q8 58 11 32Z" fill="#0e0e0c"/>
+      <path d="M11 32 Q8 58 22 76" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/>
+      <path d="M139 32 Q142 58 128 76" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none"/>
+      <ellipse cx="75" cy="76" rx="54" ry="13" fill="#0a0a08" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    </svg>`,
+    z2bFront:`<svg viewBox="0 0 150 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 32 Q75 49 139 32" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    </svg>`,
+  },
+};
+
+// Vase select
+document.querySelectorAll('.vase-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.vase-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.selectedVase = btn.dataset.vase;
+    renderVase();
+  });
+});
+function renderVase() {
+  const v = vaseSVGs[state.selectedVase];
+  document.getElementById('canvas-vase-z2a').innerHTML = v.z2a;
+  document.getElementById('canvas-vase-z2b-back').innerHTML = v.z2bBack;
+  document.getElementById('canvas-vase-body').innerHTML = v.body;
+  document.getElementById('canvas-vase-z2b-front').innerHTML = v.z2bFront;
+}
+renderVase();
+
+// ── DRAG FROM PALETTE ──
+let ghost = null;
+
+document.querySelectorAll('.elem-btn').forEach(btn => {
+  btn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const svgEl = btn.querySelector('svg');
+    state.drag = { type:'palette', id:btn.dataset.id, name:btn.dataset.name, svg:svgEl.outerHTML };
+    createGhost(svgEl.outerHTML, e.clientX, e.clientY);
+  });
+});
+
+function createGhost(svgHTML, cx, cy) {
+  ghost = document.createElement('div');
+  ghost.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;width:70px;height:80px;opacity:0.8;transform:translate(-50%,-50%);left:'+cx+'px;top:'+cy+'px';
+  ghost.innerHTML = svgHTML;
+  ghost.querySelector('svg').style.cssText = 'width:100%;height:100%';
+  document.body.appendChild(ghost);
+}
+
+// ── DRAG CANVAS ELEMENTS ──
+let resizing = null;
+let rotating = null;
+
+document.addEventListener('mousemove', e => {
+  if (ghost) { ghost.style.left = e.clientX+'px'; ghost.style.top = e.clientY+'px'; }
+
+  if (state.drag && state.drag.type === 'canvas') {
+    const canvas = document.getElementById('canvas');
+    const r = canvas.getBoundingClientRect();
+    const nx = e.clientX - r.left - state.drag.ox;
+    const ny = e.clientY - r.top - state.drag.oy;
+    state.drag.el.style.left = nx+'px';
+    state.drag.el.style.top = ny+'px';
+    const rec = state.elements.find(p => p.domId === state.drag.domId);
+    if (rec) { rec.x = nx; rec.y = ny; }
+  }
+
+  if (rotating) {
+    const angle = Math.atan2(e.clientY - rotating.cy, e.clientX - rotating.cx) * (180 / Math.PI);
+    const delta = angle - rotating.startAngle;
+    const newRot = rotating.startRot + delta;
+    rotating.el.style.transform = `rotate(${newRot}deg)`;
+    const rec = state.elements.find(p => p.domId === rotating.domId);
+    if (rec) rec.rot = newRot;
+  }
+
+  if (resizing) {
+    const dx = e.clientX - resizing.startX;
+    const dy = e.clientY - resizing.startY;
+    const nw = Math.max(30, resizing.startW + dx);
+    const nh = Math.max(30, resizing.startH + dy);
+    resizing.el.style.width = nw+'px';
+    resizing.el.style.height = nh+'px';
+    const rec = state.elements.find(p => p.domId === resizing.domId);
+    if (rec) { rec.w = nw; rec.h = nh; }
+  }
+});
+
+document.addEventListener('mouseup', e => {
+  if (state.drag && state.drag.type === 'palette') {
+    const canvas = document.getElementById('canvas');
+    const r = canvas.getBoundingClientRect();
+    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+      placeElement(state.drag, e.clientX - r.left - 35, e.clientY - r.top - 45);
+    }
+  }
+  if (ghost) { ghost.remove(); ghost = null; }
+  state.drag = null;
+  resizing = null;
+  rotating = null;
+});
+
+function placeElement(data, x, y) {
+  const domId = 'e'+(state.nextId++);
+  const sizes = {peony:{w:84,h:98},iris:{w:63,h:112},chrysanthemum:{w:84,h:98},lotus:{w:77,h:105},cherry:{w:91,h:119},pine:{w:98,h:133},plum:{w:91,h:119},fern:{w:77,h:112},moss:{w:98,h:63},broadleaf:{w:77,h:105}};
+  const s = sizes[data.id] || {w:72,h:90};
+
+  const el = document.createElement('div');
+  el.className = 'canvas-elem';
+  el.id = domId;
+  el.style.cssText = 'left:'+x+'px;top:'+y+'px;width:'+s.w+'px;height:'+s.h+'px;';
+  el.innerHTML = data.svg + '<div class="elem-rotate">&#x21BB;</div><div class="elem-resize" data-domid="'+domId+'"></div>';
+  el.querySelector('svg').style.cssText = 'width:100%;height:100%;display:block';
+
+  // Move existing elements
+  el.addEventListener('mousedown', ev => {
+    if (ev.target.closest('.elem-resize')) return;
+    ev.stopPropagation(); ev.preventDefault();
+    selectElem(domId);
+    const r = el.getBoundingClientRect();
+    state.drag = { type:'canvas', domId, el, ox:ev.clientX-r.left, oy:ev.clientY-r.top };
+    el.classList.add('dragging-live');
+  });
+  el.addEventListener('mouseup', () => el.classList.remove('dragging-live'));
+
+  // Resize handle
+  el.querySelector('.elem-resize').addEventListener('mousedown', ev => {
+    ev.stopPropagation(); ev.preventDefault();
+    const r = el.getBoundingClientRect();
+    resizing = { domId, el, startX:ev.clientX, startY:ev.clientY, startW:r.width, startH:r.height };
+  });
+
+  // Rotate handle
+  el.querySelector('.elem-rotate').addEventListener('mousedown', ev => {
+    ev.stopPropagation(); ev.preventDefault();
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const rec = state.elements.find(p => p.domId === domId);
+    const startAngle = Math.atan2(ev.clientY - cy, ev.clientX - cx) * (180 / Math.PI);
+    const startRot = rec ? (rec.rot || 0) : 0;
+    rotating = { domId, el, cx, cy, startAngle, startRot };
+  });
+
+  document.getElementById('canvas-inner').appendChild(el);
+  state.elements.push({ domId, id:data.id, name:data.name, x, y, w:s.w, h:s.h });
+  updateUI();
+}
+
+function selectElem(domId) {
+  document.querySelectorAll('.canvas-elem').forEach(el => el.classList.remove('selected-elem'));
+  state.selectedElem = domId;
+  if (domId) document.getElementById(domId)?.classList.add('selected-elem');
+}
+
+document.getElementById('canvas').addEventListener('mousedown', e => {
+  if (!e.target.closest('.canvas-elem')) selectElem(null);
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedElem) {
+    const domId = state.selectedElem;
+    document.getElementById(domId)?.remove();
+    state.elements = state.elements.filter(el => el.domId !== domId);
+    state.selectedElem = null;
+    updateUI();
+  }
+});
+
+function updateUI() {
+  const n = state.elements.length;
+  document.getElementById('count').textContent = n;
+  document.getElementById('done-btn').disabled = n === 0;
+  document.getElementById('dot2').className = n > 0 ? 'step-dot active' : 'step-dot';
+  document.getElementById('drop-hint').classList.toggle('hidden', n > 0);
+}
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  state.elements = [];
+  document.querySelectorAll('.canvas-elem').forEach(el => el.remove());
+  updateUI();
+});
+
+// ── DISPLAY MODE ──
+document.getElementById('done-btn').addEventListener('click', enterDisplay);
+
+function enterDisplay() {
+  const dispArr = document.getElementById('display-arrangement');
+  dispArr.innerHTML = '';
+
+  [{id:'canvas-vase-z2a',z:1},{id:'canvas-vase-z2b-back',z:2},{id:'canvas-vase-body',z:5},{id:'canvas-vase-z2b-front',z:6}].forEach(({id,z}) => {
+    const orig = document.getElementById(id);
+    const vc = orig.cloneNode(true);
+    vc.removeAttribute('id');
+    vc.style.cssText = `position:absolute;bottom:80px;left:50%;transform:translateX(-50%);width:140px;z-index:${z};pointer-events:none;`;
+    const svgEl = vc.querySelector('svg');
+    if (svgEl) svgEl.style.cssText = 'width:100%;height:auto;display:block';
+    dispArr.appendChild(vc);
+  });
+
+  // Canvas vase center and bottom in builder coords
+  const canvasEl = document.getElementById('canvas');
+  const canvasRect = canvasEl.getBoundingClientRect();
+  const builderCX = canvasRect.left + canvasRect.width / 2;
+  const builderVaseBottomY = canvasRect.bottom - 48;
+  // Display vase center and bottom
+  const dispCX = window.innerWidth / 2;
+  const dispVaseBottomY = window.innerHeight - 80;
+
+  state.elements.forEach(rec => {
+    const orig = document.getElementById(rec.domId);
+    if (!orig) return;
+    const ec = orig.cloneNode(true);
+    ec.removeAttribute('id');
+    // Map element position from builder coords to display coords
+    const elemCX = canvasRect.left + rec.x + rec.w / 2;
+    const elemBottomY = canvasRect.top + rec.y + rec.h;
+    const newLeft = dispCX + (elemCX - builderCX) - rec.w / 2;
+    const newTop = dispVaseBottomY + (elemBottomY - builderVaseBottomY) - rec.h;
+    ec.style.cssText = `position:absolute;left:${newLeft}px;top:${newTop}px;width:${rec.w}px;height:${rec.h}px;cursor:default;pointer-events:none;z-index:4;`;
+    if (rec.rot) ec.style.transform = `rotate(${rec.rot}deg)`;
+    const svg = ec.querySelector('svg');
+    if (svg) svg.style.cssText = 'width:100%;height:100%;display:block';
+    ['elem-resize','elem-rotate'].forEach(cls => { const el = ec.querySelector('.'+cls); if (el) el.remove(); });
+    ec.classList.remove('selected-elem');
+    dispArr.appendChild(ec);
+  });
+
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dt-date').textContent = days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate()+' · '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+
+  const names = [...new Set(state.elements.map(e => e.name))];
+  const fd = document.getElementById('dt-flowers');
+  fd.innerHTML = '';
+  const indents = [0,24,8,40,16];
+  names.forEach((n,i) => {
+    const s = document.createElement('span');
+    s.style.cssText = 'display:block;padding-left:'+(indents[i%indents.length])+'px';
+    s.textContent = n;
+    fd.appendChild(s);
+  });
+
+  document.getElementById('display-mode').classList.add('visible');
+}
+
+document.getElementById('remake-btn').addEventListener('click', () => {
+  document.getElementById('display-mode').classList.remove('visible');
+  state.elements = [];
+  document.querySelectorAll('#canvas-inner .canvas-elem').forEach(el => el.remove());
+  updateUI();
+});
+
+updateUI();
+</script>
+</body>
+</html>
