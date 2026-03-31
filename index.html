@@ -92,7 +92,7 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
     radial-gradient(ellipse 40% 55% at 76% 28%, rgba(28,38,14,0.28) 0%,transparent 60%);
 }
 #canvas{
-  position:relative;width:100%;height:100%;outline:none;
+  position:relative;width:100%;height:100%;max-height:500px;outline:none;
 }
 #canvas-inner{position:absolute;inset:0;overflow:hidden}
 
@@ -446,7 +446,7 @@ function updateVaseSize() {
   const cw = wrap.offsetWidth;
   const ch = wrap.offsetHeight;
   if (!cw || !ch) return;
-  const w = Math.min(ch * 0.32, cw * 0.25);
+  const w = Math.min(cw * 0.20, ch * 0.45);
   ['canvas-vase-z2a','canvas-vase-z2b-back','canvas-vase-z2b-front','canvas-vase-body'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.width = w + 'px';
