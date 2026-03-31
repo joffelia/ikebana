@@ -147,8 +147,17 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
   font-size:13px;color:var(--lime);line-height:1;
 }
 .canvas-elem:hover .elem-resize,
-.canvas-elem:hover .elem-rotate{opacity:1}
+.canvas-elem:hover .elem-rotate,
+.canvas-elem:hover .elem-flip-h{opacity:1}
 .canvas-elem.selected-elem .elem-rotate{opacity:0.5}
+
+/* FLIP HANDLES */
+.elem-flip-h,.elem-flip-v{
+  position:absolute;width:14px;height:14px;cursor:pointer;opacity:0;
+  transition:opacity 0.2s;z-index:10;display:flex;align-items:center;
+  justify-content:center;font-size:11px;color:var(--lime);line-height:1;
+}
+.elem-flip-h{bottom:-5px;left:-5px;}
 
 /* FOOTER */
 #footer{
@@ -341,11 +350,11 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
             <img src="flowers/pine.png" style="width:100%;height:72%;object-fit:contain;pointer-events:none">
             <span class="elem-name">Pine</span>
           </div>
-          <div class="elem-btn" data-id="plum" data-name="Plum branch">
-            <svg viewBox="0 0 50 70"><path d="M25 70 L24 48 L18 28" stroke="#4A3020" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 48 L36 32" stroke="#4A3020" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M18 28 L10 14" stroke="#4A3020" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M18 28 L28 16" stroke="#4A3020" stroke-width="1.3" fill="none" stroke-linecap="round"/><g transform="translate(10,14)"><circle cx="0" cy="-4" r="3" fill="#F5E0F0"/><circle cx="3.8" cy="-1.2" r="3" fill="#EDD0E8"/><circle cx="2.3" cy="3.2" r="3" fill="#F5E0F0"/><circle cx="-2.3" cy="3.2" r="3" fill="#EDD0E8"/><circle cx="-3.8" cy="-1.2" r="3" fill="#F5E0F0"/><circle r="2" fill="#E8C4E0"/><circle r="0.8" fill="#F0A0C8"/></g><g transform="translate(36,32)"><circle cx="0" cy="-3.5" r="2.5" fill="#F5E0F0"/><circle cx="3.3" cy="-1" r="2.5" fill="#EDD0E8"/><circle cx="2" cy="2.8" r="2.5" fill="#F5E0F0"/><circle cx="-2" cy="2.8" r="2.5" fill="#EDD0E8"/><circle cx="-3.3" cy="-1" r="2.5" fill="#F5E0F0"/><circle r="1.8" fill="#E8C4E0"/></g><g transform="translate(28,16)"><circle cx="0" cy="-3" r="2.2" fill="#F5E0F0"/><circle cx="2.9" cy="-0.9" r="2.2" fill="#EDD0E8"/><circle cx="1.8" cy="2.5" r="2.2" fill="#F5E0F0"/><circle cx="-1.8" cy="2.5" r="2.2" fill="#EDD0E8"/><circle cx="-2.9" cy="-0.9" r="2.2" fill="#F5E0F0"/><circle r="1.5" fill="#E8C4E0"/></g></svg>
-            <span class="elem-name">Plum</span>
+          <div class="elem-btn" data-id="bamboo" data-name="Bamboo">
+            <img src="flowers/bamboo.png" style="width:100%;height:72%;object-fit:contain;pointer-events:none">
+            <span class="elem-name">Bamboo</span>
           </div>
-        </div>
+</div>
 
         <span class="cat-label">Foliage</span>
         <div class="element-grid">
@@ -422,6 +431,160 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
         <span style="left:68%; bottom:42%; --d:26s; --dx:-20px; animation-delay:-17s"></span>
         <span style="left:78%; bottom:32%; --d:38s; --dx:10px;  animation-delay:-7s"></span>
         <span style="left:91%; bottom:38%; --d:23s; --dx:-24px; animation-delay:-24s"></span>
+        <span style="left:10%; bottom:50%; --d:33s; --dx:18px;  animation-delay:-13s"></span>
+        <span style="left:25%; bottom:55%; --d:27s; --dx:-12px; animation-delay:-29s"></span>
+        <span style="left:50%; bottom:48%; --d:41s; --dx:20px;  animation-delay:-8s"></span>
+        <span style="left:66%; bottom:52%; --d:36s; --dx:-16px; animation-delay:-19s"></span>
+        <span style="left:83%; bottom:45%; --d:30s; --dx:14px;  animation-delay:-35s"></span>
+        <span style="left:7%;  bottom:60%; --d:34s; --dx:-18px; animation-delay:-11s"></span>
+        <span style="left:14%; bottom:65%; --d:28s; --dx:22px;  animation-delay:-42s"></span>
+        <span style="left:20%; bottom:58%; --d:45s; --dx:-10px; animation-delay:-6s"></span>
+        <span style="left:33%; bottom:62%; --d:31s; --dx:16px;  animation-delay:-23s"></span>
+        <span style="left:40%; bottom:70%; --d:26s; --dx:-20px; animation-delay:-38s"></span>
+        <span style="left:47%; bottom:63%; --d:39s; --dx:12px;  animation-delay:-16s"></span>
+        <span style="left:54%; bottom:68%; --d:23s; --dx:-24px; animation-delay:-9s"></span>
+        <span style="left:61%; bottom:57%; --d:37s; --dx:18px;  animation-delay:-44s"></span>
+        <span style="left:70%; bottom:72%; --d:29s; --dx:-14px; animation-delay:-27s"></span>
+        <span style="left:76%; bottom:60%; --d:42s; --dx:20px;  animation-delay:-3s"></span>
+        <span style="left:87%; bottom:66%; --d:33s; --dx:-8px;  animation-delay:-31s"></span>
+        <span style="left:94%; bottom:55%; --d:25s; --dx:16px;  animation-delay:-18s"></span>
+        <span style="left:2%;  bottom:75%; --d:38s; --dx:-22px; animation-delay:-47s"></span>
+        <span style="left:11%; bottom:80%; --d:30s; --dx:14px;  animation-delay:-14s"></span>
+        <span style="left:18%; bottom:73%; --d:44s; --dx:-18px; animation-delay:-36s"></span>
+        <span style="left:28%; bottom:78%; --d:27s; --dx:10px;  animation-delay:-5s"></span>
+        <span style="left:35%; bottom:83%; --d:35s; --dx:-16px; animation-delay:-22s"></span>
+        <span style="left:43%; bottom:76%; --d:22s; --dx:24px;  animation-delay:-41s"></span>
+        <span style="left:52%; bottom:85%; --d:40s; --dx:-12px; animation-delay:-12s"></span>
+        <span style="left:58%; bottom:79%; --d:28s; --dx:18px;  animation-delay:-30s"></span>
+        <span style="left:65%; bottom:82%; --d:33s; --dx:-20px; animation-delay:-8s"></span>
+        <span style="left:73%; bottom:77%; --d:46s; --dx:14px;  animation-delay:-48s"></span>
+        <span style="left:80%; bottom:88%; --d:24s; --dx:-10px; animation-delay:-20s"></span>
+        <span style="left:89%; bottom:81%; --d:36s; --dx:22px;  animation-delay:-37s"></span>
+        <span style="left:96%; bottom:74%; --d:29s; --dx:-16px; animation-delay:-15s"></span>
+        <span style="left:4%;  bottom:90%; --d:41s; --dx:12px;  animation-delay:-26s"></span>
+        <span style="left:13%; bottom:93%; --d:32s; --dx:-24px; animation-delay:-43s"></span>
+        <span style="left:22%; bottom:87%; --d:25s; --dx:20px;  animation-delay:-10s"></span>
+        <span style="left:31%; bottom:92%; --d:38s; --dx:-8px;  animation-delay:-34s"></span>
+        <span style="left:39%; bottom:95%; --d:27s; --dx:18px;  animation-delay:-7s"></span>
+        <span style="left:46%; bottom:89%; --d:43s; --dx:-14px; animation-delay:-39s"></span>
+        <span style="left:53%; bottom:94%; --d:31s; --dx:22px;  animation-delay:-21s"></span>
+        <span style="left:60%; bottom:91%; --d:26s; --dx:-18px; animation-delay:-46s"></span>
+        <span style="left:67%; bottom:86%; --d:35s; --dx:16px;  animation-delay:-13s"></span>
+        <span style="left:74%; bottom:96%; --d:23s; --dx:-22px; animation-delay:-32s"></span>
+        <span style="left:81%; bottom:90%; --d:40s; --dx:10px;  animation-delay:-4s"></span>
+        <span style="left:90%; bottom:93%; --d:28s; --dx:-16px; animation-delay:-40s"></span>
+        <span style="left:97%; bottom:84%; --d:34s; --dx:20px;  animation-delay:-17s"></span>
+        <span style="left:9%;  bottom:47%; --d:37s; --dx:-12px; animation-delay:-28s"></span>
+        <span style="left:36%; bottom:44%; --d:24s; --dx:18px;  animation-delay:-45s"></span>
+        <span style="left:56%; bottom:46%; --d:42s; --dx:-20px; animation-delay:-2s"></span>
+        <span style="left:79%; bottom:43%; --d:30s; --dx:14px;  animation-delay:-33s"></span>
+        <span style="left:15%; bottom:30%; --d:36s; --dx:-16px; animation-delay:-24s"></span>
+        <span style="left:45%; bottom:27%; --d:29s; --dx:22px;  animation-delay:-50s"></span>
+        <span style="left:63%; bottom:31%; --d:44s; --dx:-10px; animation-delay:-16s"></span>
+        <span style="left:86%; bottom:26%; --d:27s; --dx:18px;  animation-delay:-38s"></span>
+        <span style="left:6%;  bottom:17%; --d:32s; --dx:-20px; animation-delay:-11s"></span>
+        <span style="left:29%; bottom:12%; --d:39s; --dx:16px;  animation-delay:-27s"></span>
+        <span style="left:71%; bottom:14%; --d:25s; --dx:-14px; animation-delay:-43s"></span>
+        <span style="left:95%; bottom:16%; --d:33s; --dx:12px;  animation-delay:-6s"></span>
+        <span style="left:1%;  bottom:5%;  --d:29s; --dx:-14px; animation-delay:-8s"></span>
+        <span style="left:4%;  bottom:22%; --d:36s; --dx:20px;  animation-delay:-53s"></span>
+        <span style="left:7%;  bottom:44%; --d:24s; --dx:-18px; animation-delay:-31s"></span>
+        <span style="left:10%; bottom:67%; --d:41s; --dx:12px;  animation-delay:-19s"></span>
+        <span style="left:13%; bottom:88%; --d:28s; --dx:-22px; animation-delay:-62s"></span>
+        <span style="left:16%; bottom:11%; --d:34s; --dx:16px;  animation-delay:-7s"></span>
+        <span style="left:19%; bottom:34%; --d:47s; --dx:-10px; animation-delay:-44s"></span>
+        <span style="left:22%; bottom:56%; --d:26s; --dx:24px;  animation-delay:-25s"></span>
+        <span style="left:25%; bottom:79%; --d:38s; --dx:-16px; animation-delay:-57s"></span>
+        <span style="left:28%; bottom:7%;  --d:31s; --dx:18px;  animation-delay:-13s"></span>
+        <span style="left:31%; bottom:29%; --d:43s; --dx:-20px; animation-delay:-38s"></span>
+        <span style="left:34%; bottom:52%; --d:27s; --dx:14px;  animation-delay:-71s"></span>
+        <span style="left:37%; bottom:74%; --d:35s; --dx:-24px; animation-delay:-22s"></span>
+        <span style="left:40%; bottom:97%; --d:22s; --dx:20px;  animation-delay:-49s"></span>
+        <span style="left:43%; bottom:18%; --d:40s; --dx:-12px; animation-delay:-16s"></span>
+        <span style="left:46%; bottom:41%; --d:29s; --dx:22px;  animation-delay:-64s"></span>
+        <span style="left:49%; bottom:63%; --d:37s; --dx:-18px; animation-delay:-35s"></span>
+        <span style="left:52%; bottom:86%; --d:25s; --dx:16px;  animation-delay:-9s"></span>
+        <span style="left:55%; bottom:9%;  --d:44s; --dx:-14px; animation-delay:-56s"></span>
+        <span style="left:58%; bottom:32%; --d:30s; --dx:20px;  animation-delay:-28s"></span>
+        <span style="left:61%; bottom:55%; --d:39s; --dx:-8px;  animation-delay:-73s"></span>
+        <span style="left:64%; bottom:77%; --d:26s; --dx:18px;  animation-delay:-41s"></span>
+        <span style="left:67%; bottom:99%; --d:33s; --dx:-22px; animation-delay:-14s"></span>
+        <span style="left:70%; bottom:21%; --d:46s; --dx:14px;  animation-delay:-67s"></span>
+        <span style="left:73%; bottom:48%; --d:28s; --dx:-16px; animation-delay:-30s"></span>
+        <span style="left:76%; bottom:69%; --d:35s; --dx:24px;  animation-delay:-52s"></span>
+        <span style="left:79%; bottom:91%; --d:23s; --dx:-20px; animation-delay:-18s"></span>
+        <span style="left:82%; bottom:14%; --d:41s; --dx:12px;  animation-delay:-75s"></span>
+        <span style="left:85%; bottom:37%; --d:32s; --dx:-18px; animation-delay:-39s"></span>
+        <span style="left:88%; bottom:59%; --d:27s; --dx:22px;  animation-delay:-11s"></span>
+        <span style="left:91%; bottom:82%; --d:38s; --dx:-10px; animation-delay:-60s"></span>
+        <span style="left:94%; bottom:26%; --d:24s; --dx:16px;  animation-delay:-46s"></span>
+        <span style="left:97%; bottom:49%; --d:43s; --dx:-24px; animation-delay:-23s"></span>
+        <span style="left:2%;  bottom:71%; --d:31s; --dx:18px;  animation-delay:-68s"></span>
+        <span style="left:5%;  bottom:93%; --d:36s; --dx:-12px; animation-delay:-34s"></span>
+        <span style="left:8%;  bottom:3%;  --d:25s; --dx:20px;  animation-delay:-79s"></span>
+        <span style="left:11%; bottom:27%; --d:40s; --dx:-16px; animation-delay:-17s"></span>
+        <span style="left:14%; bottom:50%; --d:28s; --dx:14px;  animation-delay:-55s"></span>
+        <span style="left:17%; bottom:72%; --d:45s; --dx:-22px; animation-delay:-26s"></span>
+        <span style="left:20%; bottom:95%; --d:32s; --dx:18px;  animation-delay:-72s"></span>
+        <span style="left:23%; bottom:16%; --d:27s; --dx:-14px; animation-delay:-43s"></span>
+        <span style="left:26%; bottom:39%; --d:39s; --dx:22px;  animation-delay:-10s"></span>
+        <span style="left:29%; bottom:61%; --d:23s; --dx:-20px; animation-delay:-58s"></span>
+        <span style="left:32%; bottom:84%; --d:42s; --dx:16px;  animation-delay:-29s"></span>
+        <span style="left:35%; bottom:8%;  --d:30s; --dx:-18px; animation-delay:-77s"></span>
+        <span style="left:38%; bottom:31%; --d:35s; --dx:12px;  animation-delay:-42s"></span>
+        <span style="left:41%; bottom:53%; --d:26s; --dx:-24px; animation-delay:-15s"></span>
+        <span style="left:44%; bottom:76%; --d:43s; --dx:20px;  animation-delay:-66s"></span>
+        <span style="left:47%; bottom:98%; --d:29s; --dx:-10px; animation-delay:-32s"></span>
+        <span style="left:50%; bottom:19%; --d:37s; --dx:24px;  animation-delay:-5s"></span>
+        <span style="left:53%; bottom:42%; --d:24s; --dx:-18px; animation-delay:-80s"></span>
+        <span style="left:56%; bottom:64%; --d:41s; --dx:14px;  animation-delay:-48s"></span>
+        <span style="left:59%; bottom:87%; --d:28s; --dx:-22px; animation-delay:-21s"></span>
+        <span style="left:62%; bottom:10%; --d:34s; --dx:18px;  animation-delay:-63s"></span>
+        <span style="left:65%; bottom:33%; --d:47s; --dx:-16px; animation-delay:-37s"></span>
+        <span style="left:68%; bottom:57%; --d:25s; --dx:20px;  animation-delay:-12s"></span>
+        <span style="left:71%; bottom:80%; --d:38s; --dx:-12px; animation-delay:-70s"></span>
+        <span style="left:74%; bottom:24%; --d:31s; --dx:16px;  animation-delay:-54s"></span>
+        <span style="left:77%; bottom:47%; --d:44s; --dx:-20px; animation-delay:-27s"></span>
+        <span style="left:80%; bottom:70%; --d:27s; --dx:22px;  animation-delay:-82s"></span>
+        <span style="left:83%; bottom:92%; --d:36s; --dx:-14px; animation-delay:-40s"></span>
+        <span style="left:86%; bottom:13%; --d:23s; --dx:18px;  animation-delay:-1s"></span>
+        <span style="left:89%; bottom:36%; --d:40s; --dx:-24px; animation-delay:-59s"></span>
+        <span style="left:92%; bottom:58%; --d:32s; --dx:12px;  animation-delay:-33s"></span>
+        <span style="left:95%; bottom:81%; --d:26s; --dx:-16px; animation-delay:-76s"></span>
+        <span style="left:98%; bottom:4%;  --d:39s; --dx:20px;  animation-delay:-20s"></span>
+        <span style="left:3%;  bottom:46%; --d:33s; --dx:-18px; animation-delay:-84s"></span>
+        <span style="left:6%;  bottom:69%; --d:28s; --dx:14px;  animation-delay:-45s"></span>
+        <span style="left:9%;  bottom:91%; --d:42s; --dx:-22px; animation-delay:-61s"></span>
+        <span style="left:12%; bottom:6%;  --d:30s; --dx:20px;  animation-delay:-36s"></span>
+        <span style="left:15%; bottom:28%; --d:37s; --dx:-10px; animation-delay:-78s"></span>
+        <span style="left:18%; bottom:51%; --d:25s; --dx:16px;  animation-delay:-24s"></span>
+        <span style="left:21%; bottom:73%; --d:44s; --dx:-20px; animation-delay:-51s"></span>
+        <span style="left:24%; bottom:96%; --d:29s; --dx:18px;  animation-delay:-69s"></span>
+        <span style="left:27%; bottom:20%; --d:35s; --dx:-14px; animation-delay:-3s"></span>
+        <span style="left:30%; bottom:43%; --d:41s; --dx:22px;  animation-delay:-85s"></span>
+        <span style="left:33%; bottom:66%; --d:27s; --dx:-18px; animation-delay:-47s"></span>
+        <span style="left:36%; bottom:89%; --d:33s; --dx:12px;  animation-delay:-18s"></span>
+        <span style="left:39%; bottom:12%; --d:46s; --dx:-24px; animation-delay:-74s"></span>
+        <span style="left:42%; bottom:35%; --d:24s; --dx:20px;  animation-delay:-30s"></span>
+        <span style="left:45%; bottom:58%; --d:38s; --dx:-12px; animation-delay:-65s"></span>
+        <span style="left:48%; bottom:81%; --d:31s; --dx:16px;  animation-delay:-50s"></span>
+        <span style="left:51%; bottom:25%; --d:26s; --dx:-20px; animation-delay:-87s"></span>
+        <span style="left:54%; bottom:48%; --d:43s; --dx:14px;  animation-delay:-4s"></span>
+        <span style="left:57%; bottom:71%; --d:28s; --dx:-16px; animation-delay:-72s"></span>
+        <span style="left:60%; bottom:94%; --d:35s; --dx:22px;  animation-delay:-55s"></span>
+        <span style="left:63%; bottom:17%; --d:23s; --dx:-18px; animation-delay:-83s"></span>
+        <span style="left:66%; bottom:40%; --d:40s; --dx:10px;  animation-delay:-28s"></span>
+        <span style="left:69%; bottom:62%; --d:32s; --dx:-22px; animation-delay:-16s"></span>
+        <span style="left:72%; bottom:85%; --d:27s; --dx:18px;  animation-delay:-61s"></span>
+        <span style="left:75%; bottom:9%;  --d:45s; --dx:-14px; animation-delay:-42s"></span>
+        <span style="left:78%; bottom:54%; --d:30s; --dx:20px;  animation-delay:-86s"></span>
+        <span style="left:81%; bottom:76%; --d:36s; --dx:-10px; animation-delay:-33s"></span>
+        <span style="left:84%; bottom:98%; --d:24s; --dx:16px;  animation-delay:-77s"></span>
+        <span style="left:87%; bottom:23%; --d:39s; --dx:-24px; animation-delay:-14s"></span>
+        <span style="left:90%; bottom:45%; --d:28s; --dx:22px;  animation-delay:-53s"></span>
+        <span style="left:93%; bottom:68%; --d:33s; --dx:-16px; animation-delay:-88s"></span>
+        <span style="left:96%; bottom:90%; --d:41s; --dx:12px;  animation-delay:-37s"></span>
+        <span style="left:99%; bottom:38%; --d:26s; --dx:-20px; animation-delay:-66s"></span>
       </div>
     </div>
     <div id="display-arrangement"></div>
@@ -605,9 +768,9 @@ document.addEventListener('mousemove', e => {
     const angle = Math.atan2(e.clientY - rotating.cy, e.clientX - rotating.cx) * (180 / Math.PI);
     const delta = angle - rotating.startAngle;
     const newRot = rotating.startRot + delta;
-    rotating.el.style.transform = `rotate(${newRot}deg)`;
     const rec = state.elements.find(p => p.domId === rotating.domId);
-    if (rec) rec.rot = newRot;
+    if (rec) { rec.rot = newRot; rotating.el.style.transform = elemTransform(rec); }
+    else rotating.el.style.transform = `rotate(${newRot}deg)`;
   }
 
   if (resizing) {
@@ -641,12 +804,19 @@ document.addEventListener('mouseup', e => {
   rotating = null;
 });
 
+function elemTransform(rec) {
+  const rot = rec.rot || 0;
+  const sx = rec.flipX ? -1 : 1;
+  const sy = rec.flipY ? -1 : 1;
+  return `rotate(${rot}deg) scaleX(${sx}) scaleY(${sy})`;
+}
+
 function placeElement(data, x, y) {
   const domId = 'e'+(state.nextId++);
   const canvas = document.getElementById('canvas');
   const cw = canvas.offsetWidth;
   const ch = canvas.offsetHeight;
-  const sizes = {orchid:{w:98,h:112},chrysanthemum:{w:98,h:112},iris:{w:98,h:112},sakura:{w:98,h:112},cherry:{w:91,h:119},pine:{w:98,h:133},plum:{w:91,h:119},fern:{w:77,h:112},moss:{w:98,h:63},broadleaf:{w:77,h:105}};
+  const sizes = {orchid:{w:98,h:112},chrysanthemum:{w:98,h:112},iris:{w:98,h:112},sakura:{w:98,h:112},cherry:{w:91,h:119},pine:{w:98,h:133},bamboo:{w:70,h:133},plum:{w:91,h:119},fern:{w:77,h:112},moss:{w:98,h:63},broadleaf:{w:77,h:105}};
   const s = sizes[data.id] || {w:72,h:90};
   // Store as % of canvas
   const px = x / cw;
@@ -656,7 +826,7 @@ function placeElement(data, x, y) {
   el.className = 'canvas-elem';
   el.id = domId;
   el.style.cssText = 'left:'+x+'px;top:'+y+'px;width:'+s.w+'px;height:'+s.h+'px;';
-  el.innerHTML = data.svg + '<div class="elem-rotate">&#x21BB;</div><div class="elem-resize" data-domid="'+domId+'"></div>';
+  el.innerHTML = data.svg + '<div class="elem-rotate">&#x21BB;</div><div class="elem-resize" data-domid="'+domId+'"></div><div class="elem-flip-h">&#x2194;</div>';
   const elSvg = el.querySelector('svg');
   if (elSvg) elSvg.style.cssText = 'width:100%;height:100%;display:block';
   const elImg = el.querySelector('img');
@@ -692,8 +862,16 @@ function placeElement(data, x, y) {
     rotating = { domId, el, cx, cy, startAngle, startRot };
   });
 
+  // Flip handles
+  el.querySelector('.elem-flip-h').addEventListener('click', ev => {
+    ev.stopPropagation();
+    const rec = state.elements.find(p => p.domId === domId);
+    if (rec) { rec.flipX = !rec.flipX; el.style.transform = elemTransform(rec); }
+  });
+
+
   document.getElementById('canvas-inner').appendChild(el);
-  state.elements.push({ domId, id:data.id, name:data.name, x, y, px, py, w:s.w, h:s.h, pw:s.w/cw, ph:s.h/ch });
+  state.elements.push({ domId, id:data.id, name:data.name, x, y, px, py, w:s.w, h:s.h, pw:s.w/cw, ph:s.h/ch, flipX:false, flipY:false });
   updateUI();
 }
 
@@ -765,7 +943,7 @@ function enterDisplay() {
   if (inner) inner.style.cssText = 'position:absolute;inset:0;overflow:hidden;';
 
   clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-  clone.querySelectorAll('.elem-resize,.elem-rotate').forEach(el => el.remove());
+  clone.querySelectorAll('.elem-resize,.elem-rotate,.elem-flip-h').forEach(el => el.remove());
   clone.querySelectorAll('.canvas-elem').forEach(el => el.classList.remove('selected-elem'));
 
   // Find bounding box of actual content (flowers + vase) within canvas coords
