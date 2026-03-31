@@ -503,7 +503,7 @@ function updateVaseSize() {
   const cw = wrap.offsetWidth;
   const ch = wrap.offsetHeight;
   if (!cw || !ch) return;
-  const w = Math.min(cw * 0.10, ch * 0.14);
+  const w = Math.min(cw * 0.15, ch * 0.21);
   canvas.style.setProperty('--vase-w', w + 'px');
 }
 
