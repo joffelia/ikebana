@@ -92,21 +92,20 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
     radial-gradient(ellipse 40% 55% at 76% 28%, rgba(28,38,14,0.28) 0%,transparent 60%);
 }
 #canvas{
-  position:relative;width:560px;height:100%;max-height:500px;
-  border-left:1px solid var(--border2);border-right:1px solid var(--border2);
+  position:relative;width:100%;height:100%;max-height:500px;
 }
 #canvas-inner{position:absolute;inset:0;overflow:hidden}
 
-/* VASE — 5 layers matching elevation diagram */
+/* VASE — responsive, always 20% of canvas width */
 #canvas-vase-z2a,#canvas-vase-z2b-back,#canvas-vase-z2b-front,#canvas-vase-body{
   position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
-  pointer-events:none;
+  pointer-events:none;width:20%;
 }
-#canvas-vase-z2a      { z-index:1; width:80px; }
-#canvas-vase-z2b-back { z-index:2; width:80px; }
-#canvas-vase-z2b-front{ z-index:6; width:80px; }
-#canvas-vase-body     { z-index:5; width:80px; }
-#canvas-vase-z2a svg,#canvas-vase-z2b-back svg,#canvas-vase-z2b-front svg,#canvas-vase-body svg{width:100%;height:120px;display:block;overflow:visible}
+#canvas-vase-z2a      { z-index:1; }
+#canvas-vase-z2b-back { z-index:2; }
+#canvas-vase-z2b-front{ z-index:6; }
+#canvas-vase-body     { z-index:5; }
+#canvas-vase-z2a svg,#canvas-vase-z2b-back svg,#canvas-vase-z2b-front svg,#canvas-vase-body svg{width:100%;height:auto;display:block;overflow:visible}
 
 /* DROP HINT */
 #drop-hint{
@@ -446,6 +445,21 @@ function renderVase() {
 }
 renderVase();
 
+const resizeObserver = new ResizeObserver(() => {
+  const canvas = document.getElementById('canvas');
+  const cw = canvas.offsetWidth;
+  const ch = canvas.offsetHeight;
+  state.elements.forEach(rec => {
+    const el = document.getElementById(rec.domId);
+    if (!el) return;
+    rec.x = rec.px * cw;
+    rec.y = rec.py * ch;
+    el.style.left = rec.x + 'px';
+    el.style.top = rec.y + 'px';
+  });
+});
+resizeObserver.observe(document.getElementById('canvas'));
+
 // ── DRAG FROM PALETTE ──
 let ghost = null;
 
@@ -481,7 +495,12 @@ document.addEventListener('mousemove', e => {
     state.drag.el.style.left = nx+'px';
     state.drag.el.style.top = ny+'px';
     const rec = state.elements.find(p => p.domId === state.drag.domId);
-    if (rec) { rec.x = nx; rec.y = ny; }
+    if (rec) {
+      rec.x = nx; rec.y = ny;
+      const canvas = document.getElementById('canvas');
+      rec.px = nx / canvas.offsetWidth;
+      rec.py = ny / canvas.offsetHeight;
+    }
   }
 
   if (rotating) {
@@ -521,8 +540,14 @@ document.addEventListener('mouseup', e => {
 
 function placeElement(data, x, y) {
   const domId = 'e'+(state.nextId++);
+  const canvas = document.getElementById('canvas');
+  const cw = canvas.offsetWidth;
+  const ch = canvas.offsetHeight;
   const sizes = {peony:{w:84,h:98},iris:{w:63,h:112},chrysanthemum:{w:84,h:98},lotus:{w:77,h:105},cherry:{w:91,h:119},pine:{w:98,h:133},plum:{w:91,h:119},fern:{w:77,h:112},moss:{w:98,h:63},broadleaf:{w:77,h:105}};
   const s = sizes[data.id] || {w:72,h:90};
+  // Store as % of canvas
+  const px = x / cw;
+  const py = y / ch;
 
   const el = document.createElement('div');
   el.className = 'canvas-elem';
@@ -562,7 +587,7 @@ function placeElement(data, x, y) {
   });
 
   document.getElementById('canvas-inner').appendChild(el);
-  state.elements.push({ domId, id:data.id, name:data.name, x, y, w:s.w, h:s.h });
+  state.elements.push({ domId, id:data.id, name:data.name, x, y, px, py, w:s.w, h:s.h });
   updateUI();
 }
 
