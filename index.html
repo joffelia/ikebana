@@ -92,7 +92,7 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
     radial-gradient(ellipse 40% 55% at 76% 28%, rgba(28,38,14,0.28) 0%,transparent 60%);
 }
 #canvas{
-  position:relative;width:560px;height:100%;
+  position:relative;width:560px;height:100%;max-height:500px;
   border-left:1px solid var(--border2);border-right:1px solid var(--border2);
 }
 #canvas-inner{position:absolute;inset:0;overflow:hidden}
@@ -102,10 +102,10 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
   position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
   pointer-events:none;
 }
-#canvas-vase-z2a      { z-index:1; width:110px; }
-#canvas-vase-z2b-back { z-index:2; width:110px; }
-#canvas-vase-z2b-front{ z-index:6; width:110px; }
-#canvas-vase-body     { z-index:5; width:110px; }
+#canvas-vase-z2a      { z-index:1; width:80px; }
+#canvas-vase-z2b-back { z-index:2; width:80px; }
+#canvas-vase-z2b-front{ z-index:6; width:80px; }
+#canvas-vase-body     { z-index:5; width:80px; }
 #canvas-vase-z2a svg,#canvas-vase-z2b-back svg,#canvas-vase-z2b-front svg,#canvas-vase-body svg{width:100%;height:auto;display:block}
 
 /* DROP HINT */
