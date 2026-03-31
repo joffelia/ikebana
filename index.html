@@ -92,7 +92,7 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
     radial-gradient(ellipse 40% 55% at 76% 28%, rgba(28,38,14,0.28) 0%,transparent 60%);
 }
 #canvas{
-  position:relative;width:100%;height:100%;max-height:500px;outline:none;
+  position:relative;width:100%;height:100%;outline:none;
 }
 #canvas-inner{position:absolute;inset:0;overflow:hidden}
 
@@ -441,12 +441,25 @@ document.querySelectorAll('.vase-btn').forEach(btn => {
     renderVase();
   });
 });
+function updateVaseSize() {
+  const wrap = document.getElementById('canvas-wrap');
+  const cw = wrap.offsetWidth;
+  const ch = wrap.offsetHeight;
+  if (!cw || !ch) return;
+  const w = Math.min(ch * 0.32, cw * 0.25);
+  ['canvas-vase-z2a','canvas-vase-z2b-back','canvas-vase-z2b-front','canvas-vase-body'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = w + 'px';
+  });
+}
+
 function renderVase() {
   const v = vaseSVGs[state.selectedVase];
   document.getElementById('canvas-vase-z2a').innerHTML = v.z2a;
   document.getElementById('canvas-vase-z2b-back').innerHTML = v.z2bBack;
   document.getElementById('canvas-vase-body').innerHTML = v.body;
   document.getElementById('canvas-vase-z2b-front').innerHTML = v.z2bFront;
+  updateVaseSize();
 }
 renderVase();
 
@@ -454,6 +467,7 @@ const resizeObserver = new ResizeObserver(() => {
   const canvas = document.getElementById('canvas');
   const cw = canvas.offsetWidth;
   const ch = canvas.offsetHeight;
+  updateVaseSize();
   state.elements.forEach(rec => {
     const el = document.getElementById(rec.domId);
     if (!el) return;
@@ -726,10 +740,12 @@ function enterDisplay() {
 }
 
 window.addEventListener('resize', () => {
+  updateVaseSize();
   if (document.getElementById('display-mode').classList.contains('visible')) {
     enterDisplay();
   }
 });
+requestAnimationFrame(updateVaseSize);
 
 document.getElementById('remake-btn').addEventListener('click', () => {
   document.getElementById('display-mode').classList.remove('visible');
