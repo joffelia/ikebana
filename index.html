@@ -321,6 +321,10 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
             <img src="flowers/orchid.png" style="width:100%;height:72%;object-fit:contain;pointer-events:none">
             <span class="elem-name">Orchid</span>
           </div>
+          <div class="elem-btn" data-id="chrysanthemum" data-name="Chrysanthemum">
+            <img src="flowers/chrysanthemum.png" style="width:100%;height:72%;object-fit:contain;pointer-events:none">
+            <span class="elem-name">Chrysanth.</span>
+          </div>
         </div>
 
         <span class="cat-label">Branches</span>
@@ -638,7 +642,7 @@ function placeElement(data, x, y) {
   const canvas = document.getElementById('canvas');
   const cw = canvas.offsetWidth;
   const ch = canvas.offsetHeight;
-  const sizes = {orchid:{w:98,h:112},sakura:{w:98,h:112},cherry:{w:91,h:119},pine:{w:98,h:133},plum:{w:91,h:119},fern:{w:77,h:112},moss:{w:98,h:63},broadleaf:{w:77,h:105}};
+  const sizes = {orchid:{w:98,h:112},chrysanthemum:{w:98,h:112},sakura:{w:98,h:112},cherry:{w:91,h:119},pine:{w:98,h:133},plum:{w:91,h:119},fern:{w:77,h:112},moss:{w:98,h:63},broadleaf:{w:77,h:105}};
   const s = sizes[data.id] || {w:72,h:90};
   // Store as % of canvas
   const px = x / cw;
