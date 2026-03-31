@@ -204,6 +204,48 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
 @keyframes md2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-2%,3%) scale(0.97)}}
 @keyframes md3{0%{transform:translate(0,0) scale(1)}100%{transform:translate(2%,-2%) scale(1.03)}}
 
+/* Zen — slow breathing glow */
+.zen-glow{
+  position:absolute;left:50%;top:55%;
+  width:520px;height:520px;margin-left:-260px;margin-top:-260px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle, rgba(180,230,40,0.055) 0%, transparent 62%);
+  animation:zenBreathe 12s ease-in-out infinite alternate;
+}
+@keyframes zenBreathe{
+  0%  {transform:scale(0.65);opacity:0.3}
+  100%{transform:scale(1.45);opacity:1}
+}
+
+/* Zen — expanding ink rings */
+.zen-ring{
+  position:absolute;left:50%;top:55%;
+  width:150px;height:150px;margin-left:-75px;margin-top:-75px;
+  border-radius:50%;pointer-events:none;
+  border:1px solid rgba(180,230,40,0.13);
+  animation:zenRing 24s linear infinite;
+}
+@keyframes zenRing{
+  0%  {transform:scale(0.1);opacity:0.85}
+  65% {opacity:0.07}
+  100%{transform:scale(10);opacity:0}
+}
+
+/* Zen — floating motes */
+.zen-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.zen-particles span{
+  position:absolute;
+  width:1.5px;height:1.5px;border-radius:50%;
+  background:rgba(180,230,40,0.45);
+  animation:zenFloat var(--d,22s) ease-in-out infinite;
+}
+@keyframes zenFloat{
+  0%  {transform:translateY(0) translateX(0);opacity:0}
+  12% {opacity:1}
+  85% {opacity:0.35}
+  100%{transform:translateY(-100vh) translateX(var(--dx,15px));opacity:0}
+}
+
 /* Arrangement snapshot — scaled up and centered */
 #display-arrangement{
   position:absolute;inset:0;pointer-events:none;
@@ -352,6 +394,20 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
       <div class="mist-layer"></div>
       <div class="mist-layer"></div>
       <div class="mist-layer"></div>
+      <div class="zen-glow"></div>
+      <div class="zen-ring" style="animation-delay:0s"></div>
+      <div class="zen-ring" style="animation-delay:-8s"></div>
+      <div class="zen-ring" style="animation-delay:-16s"></div>
+      <div class="zen-particles">
+        <span style="left:8%;  bottom:4%;  --d:26s; --dx:18px;  animation-delay:-3s"></span>
+        <span style="left:22%; bottom:12%; --d:33s; --dx:-12px; animation-delay:-11s"></span>
+        <span style="left:38%; bottom:7%;  --d:21s; --dx:22px;  animation-delay:-18s"></span>
+        <span style="left:53%; bottom:3%;  --d:29s; --dx:-8px;  animation-delay:-6s"></span>
+        <span style="left:67%; bottom:10%; --d:24s; --dx:28px;  animation-delay:-14s"></span>
+        <span style="left:79%; bottom:6%;  --d:37s; --dx:-18px; animation-delay:-22s"></span>
+        <span style="left:15%; bottom:18%; --d:31s; --dx:14px;  animation-delay:-27s"></span>
+        <span style="left:88%; bottom:14%; --d:28s; --dx:-22px; animation-delay:-8s"></span>
+      </div>
     </div>
     <div id="display-arrangement"></div>
     <div id="display-text">
@@ -680,9 +736,14 @@ function enterDisplay() {
 
   // Apply ID-based CSS rules as inline styles before removing IDs
   const vaseZMap = {'canvas-vase-z2a':1,'canvas-vase-z2b-back':2,'canvas-vase-z2b-front':6,'canvas-vase-body':5};
+  const actualVaseW = document.getElementById('canvas-vase-z2a').offsetWidth;
   Object.entries(vaseZMap).forEach(([id, z]) => {
     const el = clone.querySelector('#'+id);
-    if (el) el.style.cssText = `position:absolute;bottom:32px;left:50%;transform:translateX(-50%);pointer-events:none;width:${document.getElementById('canvas-vase-z2a').offsetWidth}px;z-index:${z};`;
+    if (el) {
+      el.style.cssText = `position:absolute;bottom:32px;left:50%;transform:translateX(-50%);pointer-events:none;width:${actualVaseW}px;z-index:${z};`;
+      const svg = el.querySelector('svg');
+      if (svg) svg.style.cssText = 'width:100%;height:auto;display:block;overflow:visible';
+    }
   });
   const inner = clone.querySelector('#canvas-inner');
   if (inner) inner.style.cssText = 'position:absolute;inset:0;overflow:hidden;';
@@ -694,7 +755,7 @@ function enterDisplay() {
   // Find bounding box of actual content (flowers + vase) within canvas coords
   const vaseBottom = r.height - 32;
   const vaseCX = r.width / 2;
-  const vaseHalfW = r.width * 0.1;
+  const vaseHalfW = actualVaseW / 2;
 
   let contentTop, contentLeft, contentRight;
   if (state.elements.length > 0) {
