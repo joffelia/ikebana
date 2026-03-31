@@ -329,8 +329,8 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
             <img src="flowers/sakura.png" style="width:100%;height:72%;object-fit:contain;pointer-events:none">
             <span class="elem-name">Sakura</span>
           </div>
-          <div class="elem-btn" data-id="pine" data-name="Pine branch">
-            <svg viewBox="0 0 50 70"><path d="M25 70 Q25 48 24 30" stroke="#3D2B1A" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M24 42 Q14 34 8 26" stroke="#3D2B1A" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M24 34 Q34 28 42 20" stroke="#3D2B1A" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M24 30 Q20 18 18 8" stroke="#3D2B1A" stroke-width="1.5" fill="none" stroke-linecap="round"/><g transform="translate(8,26)"><line x1="0" y1="0" x2="-6" y2="-4" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-4" y2="-7" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="-8" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="2" y2="-8" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="-6" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/></g><g transform="translate(42,20)"><line x1="0" y1="0" x2="-5" y2="-5" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="0" y2="-8" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="5" y2="-5" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/></g><g transform="translate(18,8)"><line x1="0" y1="0" x2="-5" y2="-4" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="-3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="0" y2="-8" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="3" y2="-7" stroke="#355E22" stroke-width="1.2" stroke-linecap="round"/><line x1="0" y1="0" x2="5" y2="-4" stroke="#2D5A1B" stroke-width="1.2" stroke-linecap="round"/></g></svg>
+          <div class="elem-btn" data-id="pine" data-name="Pine">
+            <img src="flowers/pine.png" style="width:100%;height:72%;object-fit:contain;pointer-events:none">
             <span class="elem-name">Pine</span>
           </div>
           <div class="elem-btn" data-id="plum" data-name="Plum branch">
@@ -510,7 +510,8 @@ function updateVaseSize() {
   const cw = wrap.offsetWidth;
   const ch = wrap.offsetHeight;
   if (!cw || !ch) return;
-  const w = Math.min(cw * 0.22, ch * 0.32);
+  const vaseScale = {cylinder:0.72, widemouth:0.72, kenzan:1.0}[state.selectedVase] ?? 1.0;
+  const w = Math.min(cw * 0.22, ch * 0.32) * vaseScale;
   canvas.style.setProperty('--vase-w', w + 'px');
 }
 
