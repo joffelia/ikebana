@@ -99,7 +99,7 @@ body{font-family:var(--mono);color:var(--text);user-select:none}
 /* VASE — responsive, always 20% of canvas width */
 #canvas-vase-z2a,#canvas-vase-z2b-back,#canvas-vase-z2b-front,#canvas-vase-body{
   position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
-  pointer-events:none;width:20%;
+  pointer-events:none;width:10%;
 }
 #canvas-vase-z2a      { z-index:1; }
 #canvas-vase-z2b-back { z-index:2; }
@@ -446,7 +446,7 @@ function updateVaseSize() {
   const cw = wrap.offsetWidth;
   const ch = wrap.offsetHeight;
   if (!cw || !ch) return;
-  const w = Math.min(cw * 0.20, ch * 0.45);
+  const w = Math.min(cw * 0.10, ch * 0.225);
   ['canvas-vase-z2a','canvas-vase-z2b-back','canvas-vase-z2b-front','canvas-vase-body'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.width = w + 'px';
@@ -684,7 +684,7 @@ function enterDisplay() {
   const vaseZMap = {'canvas-vase-z2a':1,'canvas-vase-z2b-back':2,'canvas-vase-z2b-front':6,'canvas-vase-body':5};
   Object.entries(vaseZMap).forEach(([id, z]) => {
     const el = clone.querySelector('#'+id);
-    if (el) el.style.cssText = `position:absolute;bottom:32px;left:50%;transform:translateX(-50%);pointer-events:none;width:20%;z-index:${z};`;
+    if (el) el.style.cssText = `position:absolute;bottom:32px;left:50%;transform:translateX(-50%);pointer-events:none;width:10%;z-index:${z};`;
   });
   const inner = clone.querySelector('#canvas-inner');
   if (inner) inner.style.cssText = 'position:absolute;inset:0;overflow:hidden;';
